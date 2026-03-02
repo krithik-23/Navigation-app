@@ -353,7 +353,7 @@ header h1 span {
   font-weight: 600;
 }
 
-/* Static Info Bar (Replaced Slider) */
+/* Static Info Bar */
 .info-bar {
   background: linear-gradient(90deg, var(--bg-secondary), #162d54, var(--bg-secondary));
   border-top: 1px solid var(--border);
@@ -469,6 +469,7 @@ select option {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
+  z-index: 20;
 }
 
 .back-btn {
@@ -489,50 +490,97 @@ select option {
 .back-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: rgba(0, 212, 170, 0.05);
 }
 
 .dest-title {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 16px;
   color: var(--text-primary);
+  text-align: center;
+  flex: 1;
 }
 
 .content-wrapper {
   flex: 1;
   display: flex;
+  flex-direction: column;
   position: relative;
   overflow: hidden;
 }
 
+/* Map Container */
 #map {
-  flex: 1;
+  width: 100%;
+  height: 60%; /* Map takes top 60% */
   background: var(--bg-primary);
   z-index: 1;
+  border-bottom: 1px solid var(--border);
 }
 
-.directions-panel {
+/* New Bottom Panel with Image */
+.info-sidebar {
+  height: 40%;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  overflow-y: auto;
+}
+
+.nav-content-area {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 100%;
+}
+
+/* Destination Image Styling */
+.destination-image-container {
+  width: 100%;
+  height: 140px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.destination-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.destination-image-container .image-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  background: linear-gradient(to top, var(--bg-primary) 80%, transparent);
-  padding: 30px 20px 20px;
-  z-index: 1000;
+  padding: 10px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .directions-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 15px;
+  border-radius: 12px;
   padding: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .direction-step {
   display: flex;
   align-items: flex-start;
   gap: 15px;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
 }
 
 .direction-step:last-child {
@@ -540,8 +588,8 @@ select option {
 }
 
 .step-icon {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: rgba(0, 212, 170, 0.1);
   display: flex;
@@ -564,20 +612,20 @@ select option {
 }
 
 .arrival-badge {
-  margin-top: 15px;
   background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
   color: var(--bg-primary);
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
   text-align: center;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   display: none;
+  margin-top: auto;
 }
 
 /* Leaflet Overrides */
 .leaflet-container {
-  background: var(--bg-primary);
+  background: #050d18;
 }
 
 .leaflet-popup-content-wrapper {
@@ -591,7 +639,24 @@ select option {
   background: var(--bg-secondary);
 }
 
-/* Responsive */
+/* Responsive Adjustments for Page 3 */
+@media (min-width: 768px) {
+  .content-wrapper {
+    flex-direction: row;
+  }
+  
+  #map {
+    width: 60%;
+    height: 100%;
+  }
+  
+  .info-sidebar {
+    width: 40%;
+    height: 100%;
+    border-left: 1px solid var(--border);
+  }
+}
+
 @media (max-width: 600px) {
   .welcome-card {
     padding: 40px 30px;
@@ -607,6 +672,10 @@ select option {
   
   .banner-overlay h2 {
     font-size: 20px;
+  }
+  
+  .destination-image-container {
+    height: 100px;
   }
 }
 
@@ -711,30 +780,44 @@ select option {
       <i class="fas fa-arrow-left"></i> Back
     </button>
     <div class="dest-title" id="destTitle">Navigation</div>
-    <div style="width: 80px;"></div> <!-- Spacer -->
+    <div style="width: 80px;"></div> <!-- Spacer for centering -->
   </div>
 
   <div class="content-wrapper">
+    <!-- Map Section -->
     <div id="map"></div>
     
-    <div class="directions-panel">
-      <div class="directions-card">
-        <div class="direction-step" id="step1">
-          <div class="step-icon"><i class="fas fa-play"></i></div>
-          <div class="step-text">
-            <strong>Starting Point</strong>
-            Main Entrance Gate
+    <!-- Sidebar / Bottom Panel Section -->
+    <div class="info-sidebar">
+      <div class="nav-content-area">
+        
+        <!-- Destination Image -->
+        <div class="destination-image-container">
+          <img id="destImg" src="destination-img.png" alt="Destination">
+          <div class="image-overlay" id="imgCaption">Loading destination...</div>
+        </div>
+
+        <!-- Directions -->
+        <div class="directions-card">
+          <div class="direction-step">
+            <div class="step-icon"><i class="fas fa-play"></i></div>
+            <div class="step-text">
+              <strong>Starting Point</strong>
+              Main Entrance Gate
+            </div>
+          </div>
+          <div class="direction-step">
+            <div class="step-icon"><i class="fas fa-walking"></i></div>
+            <div class="step-text" id="directionText">
+              Calculating route...
+            </div>
           </div>
         </div>
-        <div class="direction-step" id="step2">
-          <div class="step-icon"><i class="fas fa-walking"></i></div>
-          <div class="step-text" id="directionText">
-            Calculating route...
-          </div>
-        </div>
+
         <div class="arrival-badge" id="arrivalBadge">
           <i class="fas fa-check-circle"></i> You have arrived at your destination
         </div>
+
       </div>
     </div>
   </div>
@@ -756,7 +839,7 @@ function navigateToPage(pageId) {
     }
   });
 
-  // If navigating away from map, invalidate size to fix rendering issues
+  // Invalidate map size when switching pages to fix rendering issues
   if (pageId !== 'navigationPage' && window.mainMap) {
     setTimeout(function() {
       window.mainMap.invalidateSize();
@@ -773,7 +856,7 @@ function startNavigation() {
     return;
   }
 
-  // Update UI
+  // Data for destinations
   var branchNames = {
     che: 'Computer Hardware Engineering',
     mech: 'Mechanical Engineering',
@@ -783,8 +866,10 @@ function startNavigation() {
     eee: 'Electrical & Electronics Engineering'
   };
 
+  // Update UI Text
   document.getElementById("destTitle").innerText = branchNames[selected];
   document.getElementById("directionText").innerHTML = "<strong>Proceed</strong> Walk towards " + branchNames[selected];
+  document.getElementById("imgCaption").innerText = branchNames[selected];
   document.getElementById("arrivalBadge").style.display = "none";
 
   // Switch Page
@@ -795,10 +880,12 @@ function startNavigation() {
 }
 
 function initMap(destinationKey) {
+  // Remove existing map instance if it exists
   if (window.mainMap) {
     window.mainMap.remove();
   }
 
+  // Create map
   var map = L.map('map', {
     crs: L.CRS.Simple,
     minZoom: -1,
@@ -824,7 +911,7 @@ function initMap(destinationKey) {
 
   var target = branches[destinationKey];
 
-  // Walker
+  // Walker Marker
   var walker = L.circleMarker(entrance, {
     radius: 12,
     color: '#00d4aa',
@@ -834,7 +921,7 @@ function initMap(destinationKey) {
   }).addTo(map);
 
   // Route Line
-  var routeLine = L.polyline([entrance, target], {
+  L.polyline([entrance, target], {
     color: '#00d4aa',
     weight: 4,
     dashArray: '10, 10',
