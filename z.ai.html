@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Government Polytechnic College Palakkad - Campus Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-primary: #0a1628;
+  --bg-secondary: #0f2140;
+  --accent: #00d4aa;
+  --accent-secondary: #00b894;
+  --accent-glow: rgba(0, 212, 170, 0.25);
+  --text-primary: #ffffff;
+  --text-secondary: #8ba3c7;
+  --card-bg: rgba(15, 33, 64, 0.9);
+  --border: rgba(139, 163, 199, 0.15);
+  --danger: #ff6b6b;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ================= PAGE TRANSITION SYSTEM ================= */
+.page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+  backface-visibility: hidden;
+}
+
+.page.hidden {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page.active {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ================= WELCOME PAGE (PAGE 1) ================= */
+#welcomePage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background: var(--bg-primary);
+  z-index: 10;
+}
+
+#welcomePage::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(0, 212, 170, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(26, 115, 232, 0.06) 0%, transparent 50%);
+  animation: bgPulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes bgPulse {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(2%, 2%); }
+}
+
+.grid-pattern {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(139, 163, 199, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 163, 199, 0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: 1;
+}
+
+.welcome-card {
+  background: linear-gradient(160deg, rgba(15, 33, 64, 0.98), rgba(5, 15, 30, 0.99));
+  backdrop-filter: blur(20px);
+  padding: 55px 50px;
+  border-radius: 30px;
+  text-align: center;
+  box-shadow: 
+    0 30px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px var(--border),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  width: 90%;
+  max-width: 460px;
+  z-index: 2;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+/* Professional CSS Logo */
+.css-logo {
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 30px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.css-logo .shield {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px var(--accent-glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.css-logo .shield::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: logoShine 4s infinite;
+}
+
+@keyframes logoShine {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
+
+.css-logo .shield span {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  color: var(--bg-primary);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.css-logo .shield small {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: var(--bg-primary);
+  font-size: 8px;
+  letter-spacing: 1px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.welcome-card h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  letter-spacing: -0.5px;
+}
+
+.welcome-card .subtitle {
+  font-size: 14px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.welcome-card p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 35px;
+  line-height: 1.7;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.enter-btn {
+  padding: 16px 50px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  color: var(--bg-primary);
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px var(--accent-glow);
+}
+
+.enter-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 212, 170, 0.4);
+}
+
+/* Floating Particles */
+.particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: floatUp 20s linear infinite;
+}
+
+.particle:nth-child(1) { left: 10%; animation-duration: 18s; }
+.particle:nth-child(2) { left: 30%; animation-duration: 22s; animation-delay: 2s; }
+.particle:nth-child(3) { left: 50%; animation-duration: 20s; animation-delay: 4s; }
+.particle:nth-child(4) { left: 70%; animation-duration: 25s; animation-delay: 1s; }
+.particle:nth-child(5) { left: 90%; animation-duration: 19s; animation-delay: 3s; }
+
+@keyframes floatUp {
+  0% { bottom: -5%; opacity: 0; }
+  20% { opacity: 0.5; }
+  80% { opacity: 0.5; }
+  100% { bottom: 105%; opacity: 0; }
+}
+
+/* ================= SELECTION PAGE (PAGE 2) ================= */
+#selectionPage {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  z-index: 5;
+}
+
+/* Header */
+header {
+  background: linear-gradient(180deg, var(--bg-secondary), var(--bg-primary));
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-logo-mini {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--bg-primary);
+}
+
+header h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+header h1 span {
+  color: var(--accent);
+}
+
+/* Campus Banner */
+.campus-banner {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.campus-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.campus-banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, var(--bg-primary) 10%, transparent 80%);
+}
+
+.banner-overlay {
+  position: absolute;
+  bottom: 20px;
+  left: 25px;
+  z-index: 2;
+}
+
+.banner-overlay h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  color: var(--text-primary);
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  margin-bottom: 5px;
+}
+
+.banner-overlay p {
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Static Info Bar (Replaced Slider) */
+.info-bar {
+  background: linear-gradient(90deg, var(--bg-secondary), #162d54, var(--bg-secondary));
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 15px 20px;
+  text-align: center;
+}
+
+.info-bar p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.info-bar p i {
+  color: var(--accent);
+}
+
+/* Controls */
+#controls {
+  padding: 25px 20px;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.select-wrapper i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  pointer-events: none;
+}
+
+select {
+  width: 100%;
+  padding: 16px 45px 16px 20px;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+}
+
+select:hover, select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 10px;
+}
+
+.nav-btn {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  color: var(--bg-primary);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.nav-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px var(--accent-glow);
+}
+
+/* ================= NAVIGATION PAGE (PAGE 3) ================= */
+#navigationPage {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  z-index: 15;
+}
+
+.nav-header {
+  background: var(--bg-secondary);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+}
+
+.back-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dest-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+#map {
+  flex: 1;
+  background: var(--bg-primary);
+  z-index: 1;
+}
+
+.directions-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to top, var(--bg-primary) 80%, transparent);
+  padding: 30px 20px 20px;
+  z-index: 1000;
+}
+
+.directions-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.direction-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.direction-step:last-child {
+  margin-bottom: 0;
+}
+
+.step-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 212, 170, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.step-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.step-text strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.arrival-badge {
+  margin-top: 15px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  color: var(--bg-primary);
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  display: none;
+}
+
+/* Leaflet Overrides */
+.leaflet-container {
+  background: var(--bg-primary);
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-secondary);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .welcome-card {
+    padding: 40px 30px;
+  }
+  
+  .welcome-card h1 {
+    font-size: 22px;
+  }
+  
+  .campus-banner {
+    height: 160px;
+  }
+  
+  .banner-overlay h2 {
+    font-size: 20px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= PAGE 1: WELCOME ================= -->
+<div id="welcomePage" class="page active">
+
+  <div class="grid-pattern"></div>
+  
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <div class="welcome-card">
+    
+    <div class="css-logo">
+      <div class="shield">
+        <span>GPTC</span>
+        <small>PALAKKAD</small>
+      </div>
+    </div>
+
+    <h1>Government Polytechnic College</h1>
+    <div class="subtitle">Palakkad</div>
+    
+    <p>Experience our smart campus navigation system with interactive maps and real-time guidance to your destination.</p>
+
+    <button class="enter-btn" onclick="navigateToPage('selectionPage')">
+      Enter Campus Map
+    </button>
+  </div>
+
+</div>
+
+<!-- ================= PAGE 2: SELECTION ================= -->
+<div id="selectionPage" class="page hidden">
+
+  <header>
+    <div class="header-content">
+      <div class="header-logo-mini">G</div>
+      <h1><span>Smart</span> Campus Navigation</h1>
+    </div>
+  </header>
+
+  <div class="campus-banner">
+    <img src="campus-banner.png" alt="Campus View">
+    <div class="banner-overlay">
+      <p>Welcome to</p>
+      <h2>Government Polytechnic College</h2>
+    </div>
+  </div>
+
+  <div class="info-bar">
+    <p>
+      <i class="fas fa-map-marker-alt"></i>
+      GOVERNMENT POLYTECHNIC COLLEGE PALAKKAD - INTERACTIVE CAMPUS NAVIGATION
+    </p>
+  </div>
+
+  <div id="controls">
+    <div class="select-wrapper">
+      <select id="destination">
+        <option value="">-- Select Your Destination --</option>
+        <option value="che">Computer Hardware Engineering</option>
+        <option value="mech">Mechanical Engineering</option>
+        <option value="inst">Instrumentation Engineering</option>
+        <option value="civil">Civil Engineering</option>
+        <option value="ece">Electronics Engineering</option>
+        <option value="eee">Electrical & Electronics Engineering</option>
+      </select>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+
+    <button class="nav-btn" onclick="startNavigation()">
+      <i class="fas fa-location-arrow"></i>
+      Start Navigation
+    </button>
+  </div>
+
+</div>
+
+<!-- ================= PAGE 3: NAVIGATION ================= -->
+<div id="navigationPage" class="page hidden">
+
+  <div class="nav-header">
+    <button class="back-btn" onclick="navigateToPage('selectionPage')">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+    <div class="dest-title" id="destTitle">Navigation</div>
+    <div style="width: 80px;"></div> <!-- Spacer -->
+  </div>
+
+  <div class="content-wrapper">
+    <div id="map"></div>
+    
+    <div class="directions-panel">
+      <div class="directions-card">
+        <div class="direction-step" id="step1">
+          <div class="step-icon"><i class="fas fa-play"></i></div>
+          <div class="step-text">
+            <strong>Starting Point</strong>
+            Main Entrance Gate
+          </div>
+        </div>
+        <div class="direction-step" id="step2">
+          <div class="step-icon"><i class="fas fa-walking"></i></div>
+          <div class="step-text" id="directionText">
+            Calculating route...
+          </div>
+        </div>
+        <div class="arrival-badge" id="arrivalBadge">
+          <i class="fas fa-check-circle"></i> You have arrived at your destination
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+// Page Navigation Logic
+function navigateToPage(pageId) {
+  var pages = document.querySelectorAll('.page');
+  pages.forEach(function(page) {
+    if (page.id === pageId) {
+      page.classList.remove('hidden');
+      page.classList.add('active');
+    } else {
+      page.classList.remove('active');
+      page.classList.add('hidden');
+    }
+  });
+
+  // If navigating away from map, invalidate size to fix rendering issues
+  if (pageId !== 'navigationPage' && window.mainMap) {
+    setTimeout(function() {
+      window.mainMap.invalidateSize();
+    }, 100);
+  }
+}
+
+// Navigation Logic
+function startNavigation() {
+  var selected = document.getElementById("destination").value;
+
+  if (selected === "") {
+    alert("Please select a department to navigate");
+    return;
+  }
+
+  // Update UI
+  var branchNames = {
+    che: 'Computer Hardware Engineering',
+    mech: 'Mechanical Engineering',
+    inst: 'Instrumentation Engineering',
+    civil: 'Civil Engineering',
+    ece: 'Electronics Engineering',
+    eee: 'Electrical & Electronics Engineering'
+  };
+
+  document.getElementById("destTitle").innerText = branchNames[selected];
+  document.getElementById("directionText").innerHTML = "<strong>Proceed</strong> Walk towards " + branchNames[selected];
+  document.getElementById("arrivalBadge").style.display = "none";
+
+  // Switch Page
+  navigateToPage('navigationPage');
+  
+  // Initialize Map
+  initMap(selected);
+}
+
+function initMap(destinationKey) {
+  if (window.mainMap) {
+    window.mainMap.remove();
+  }
+
+  var map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -1,
+    zoomControl: true
+  });
+
+  window.mainMap = map;
+
+  var bounds = [[0, 0], [1000, 1000]];
+  L.imageOverlay('campus.png', bounds).addTo(map);
+  map.fitBounds(bounds);
+
+  var entrance = [100, 100];
+
+  var branches = {
+    che: [250, 250],
+    mech: [400, 700],
+    inst: [300, 850],
+    civil: [650, 250],
+    ece: [700, 500],
+    eee: [850, 750]
+  };
+
+  var target = branches[destinationKey];
+
+  // Walker
+  var walker = L.circleMarker(entrance, {
+    radius: 12,
+    color: '#00d4aa',
+    fillColor: '#00d4aa',
+    fillOpacity: 1,
+    weight: 3
+  }).addTo(map);
+
+  // Route Line
+  var routeLine = L.polyline([entrance, target], {
+    color: '#00d4aa',
+    weight: 4,
+    dashArray: '10, 10',
+    opacity: 0.8
+  }).addTo(map);
+
+  // Destination Marker
+  L.marker(target).addTo(map);
+
+  // Animation Path
+  var path = [];
+  var steps = 100;
+  
+  for (var i = 0; i <= steps; i++) {
+    path.push([
+      entrance[0] + (target[0] - entrance[0]) * (i / steps),
+      entrance[1] + (target[1] - entrance[1]) * (i / steps)
+    ]);
+  }
+
+  // Animate
+  var k = 0;
+  var interval = setInterval(function() {
+    if (k >= path.length) {
+      clearInterval(interval);
+      document.getElementById("arrivalBadge").style.display = "block";
+      walker.bindPopup('You have arrived!').openPopup();
+      return;
+    }
+    walker.setLatLng(path[k]);
+    k++;
+  }, 30);
+}
+
+</script>
+
+</body>
+</html>
