@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GPTC Palakkad Navigation Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+
+/* ===== BODY ===== */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background:  #050A1F;
+  color: #F4F4F4;
+}
+
+/* ===== PAGES ===== */
+.page { display: none; }
+.active { display: block; }
+
+/* ===== COVER PAGE ===== */
+.cover {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0B132B, #1C2541);
+  text-align: center;
+}
+
+.cover-box {
+  background: rgba(255,255,255,0.05);
+  padding: 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  width: 320px;
+}
+
+.cover p {
+  opacity: 0.8;
+}
+
+/* ===== SPLIT ===== */
+.split { display: flex; height: 100vh; }
+
+/* ===== LEFT PANEL ===== */
+.left {
+  width: 35%;
+  background: linear-gradient(135deg, #1C2541, #3A506B);
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.left h2 {
+  text-align: center;
+  color: #5BC0BE;
+}
+
+/* LIST */
+.left ul { list-style: none; padding: 0; }
+
+.left li {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+/* ===== MAP ===== */
+#map { width: 65%; height: 100vh; }
+
+/* ===== BUTTON ===== */
+.btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  background: #5BC0BE;
+  color: #0B132B;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #3A506B;
+  color: #F4F4F4;
+}
+
+/* ===== PAGE 2 ===== */
+.container {
+  padding: 20px;
+  text-align: center;
+  background: #0B132B;
+  min-height: 100vh;
+}
+
+input {
+  padding: 12px;
+  width: 85%;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 15px;
+  background: #1C2541;
+  color: #F4F4F4;
+}
+
+/* SEARCH ITEMS */
+.item {
+  background: #3A506B;
+  color: #F4F4F4;
+  padding: 12px;
+  margin: 8px auto;
+  border-radius: 10px;
+  width: 80%;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.item:hover {
+  background: #5BC0BE;
+  color: #0B132B;
+}
+
+/* ===== DETAILS ===== */
+.details {
+  text-align: left;
+  max-width: 800px;
+  margin: auto;
+}
+
+.section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #3A506B;
+  border-radius: 12px;
+}
+
+.highlight {
+  background: #5BC0BE;
+  color: #0B132B;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+/* FIX WHITE MAP BACKGROUND */
+.leaflet-container {
+  background: #050A1F !important;
+}
+
+</style>
+</head>
+
+
+<body>
+<!-- PAGE 0 -->
+<div id="page0" class="page active">
+  <div class="cover">
+    <div class="cover-box">
+      <h1>GPTC Palakkad</h1>
+      <p>Smart Campus Navigation</p>
+      <button class="btn" onclick="go('page1')">📍 Enter Campus Map</button>
+      <p style="margin-top:15px;font-size:12px;">Developed by CHE Department</p>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 1 -->
+<div id="page1" class="page">
+<div class="split">
+
+<div class="left">
+<h2>Campus Blocks</h2>
+<ul>
+<li>1. MAIN BLOCK</li>
+<li>2. LIBRARY BLOCK</li>
+<li>3. COMPUTER HARDWARE ENGG. BLOCK</li>
+<li>4. AUDITORIUM</li>
+<li>5. MECHANICAL ENGG. BLOCK</li>
+<li>6. SMITHY & PROJECT ROOM</li>
+<li>7. ADDITIONAL WORKSHOP & STAFF ROOM</li>
+<li>8. GENERAL WORKSHOP</li>
+<li>9. ELECTRICAL WORKSHOP</li>
+<li>12. BOYS HOSTEL</li>
+<li>13. CANTEEN</li>
+<li>16. TOILETS</li>
+<li>17. WATCHMAN CABIN</li>
+<li>19. OPEN AUDITORIUM</li>
+<li>A. ADMIN BLOCK</li>
+<li>C. CIVIL BLOCK</li><li>D. LADIES HOSTEL</li>
+<li>F. PLAY GROUND</li>
+</ul>
+
+<button class="btn" onclick="go('page2')">Detailed Info</button>
+</div>
+
+<div id="map"></div>
+
+</div>
+</div>
+
+<!-- PAGE 2 -->
+<div id="page2" class="page">
+<div class="container">
+
+<h2>🔍 Search Department / Room</h2>
+
+<input type="text" id="search" placeholder="Type and press space/enter" onkeyup="handleSearch(event)">
+
+<div id="list"></div>
+
+<button class="btn" onclick="go('page1')">⬅ Back</button>
+
+</div>
+</div>
+
+<!-- PAGE 3 -->
+<div id="page3" class="page">
+<div class="container">
+
+<h2 id="title"></h2>
+
+<div id="details" class="details"></div>
+
+<button class="btn" onclick="go('page2')">⬅ Back</button>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+// PAGE SWITCH
+function go(id){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// MAP
+var map = L.map('map', { crs: L.CRS.Simple, minZoom: -2 });
+var bounds = [[0,0],[1000,2000]];
+L.imageOverlay('/static/map.jpg', bounds).addTo(map);
+map.fitBounds(bounds);
+
+// DATA
+const data = [
+{ name:"Computer Hardware Engineering", key:"che" },
+{ name:"Electrical and Electronics Engineering", key:"eee" },
+{ name:"Main Block", key:"main" },
+{ name:"Mechanical Engineering", key:"mech" },
+{ name:"Library Block", key:"library" },
+{ name:"Auditorium", key:"aud" }
+];
+
+// DETAILS (SHORTENED SAMPLE)
+const detailsData = {
+
+che: `
+<div class="section">
+<h3>GROUND FLOOR</h3>
+<ul>
+<li>Placement Office (301)</li>
+<li>CHE HOD Room (302)</li>
+<li>Hydraulics Lab (303)</li>
+<li>Classroom 304</li>
+<li>Heat Engine's Lab (305)</li>
+</ul>
+</div>
+<div class="section">
+<h3>FIRST FLOOR</h3>
+<ul>
+<li>Staffroom (306)</li>
+<li>Gym (307)</li>
+<li>Hardware Lab (308)</li>
+<li>Network Lab (309)</li>
+<li>Classroom 310</li>
+</ul>
+</div>
+`,
+
+eee: `
+<div class="section">
+<h3>GROUND FLOOR</h3>
+<ul>
+<li>Chemistry Lab (505)</li>
+<li>Staffroom (506)</li>
+<li>Physics Lab (507)</li>
+</ul>
+</div>
+
+<div class="section">
+<h3>FIRST FLOOR</h3>
+<ul>
+<li>Physical Education (511)</li>
+<li>NCC Room (512)</li>
+<li>Classroom (513/ L4)</li>
+<li>NSS Room (514)</li>
+<li>Classroom (515 / L5)</li>
+<li>Classroom (516 / L6)</li>
+</ul>
+</div>
+`,
+main: `
+<div class="section">
+<h3>GROUND FLOOR (1ST BLOCK)</h3>
+<ul>
+<li>101 (class room)</li>
+<li>102 (class room)</li>
+<li>IE Staffroom (103)</li>
+<li>Seminar hall of mechanical dept (104) </li>
+<li>Seminar hall of electronics dept (105) </li>
+<li>Restroom for girls (106)</li>
+<li>Toilet (girls0</li>
+</ul>
+<h3>GROUND FLOOR(2nd block)</h3>
+<ul>
+<li>108 (class room)</li>
+<li>IE HOD room</li>
+<li>IE lab1</li>
+<li>IE lab2</li>
+<li>Toilet (gents)</li>
+</ul>
+</div>
+
+<div class="section">
+<h3>FIRST FLOOR(1st block)</h3>
+<ul>
+<li>Principal Room (201)</li>
+<li>CCF (202)</li>
+<li>Server Room (203)</li>
+<li>Examination Hall (204)</li>
+<li>205 (class room)</li>
+<li>206 (class room)</li>
+</ul>
+<h3>FIRST FLOOR (2nd block)</h3>
+<ul>
+<li>ELE HOD room</li>
+<li>Electronics lab1</li>
+<li>Electronics lab2</li>
+<li>Electronics lab3</li>
+<li>Electronics lab4</li>
+<li>UPS room</li>
+</ul>
+</div>
+`,
+
+mech: `
+<div class="section">
+<h3>GROUND FLOOR</h3>
+<ul>
+<li>503 (class room0</li>
+<li>Store (502)</li>
+<li>Staffroom  mech(501)</li>
+</ul>
+</div>
+
+<div class="section">
+<h3>FIRST FLOOR</h3>
+<ul>
+<li>510/L3 (class room)</li>
+<li>509 (class room)</li>
+<li>508 (class room)</li>
+</ul>
+</div>
+`,
+
+library: `
+<div class="section">
+<h3>GROUND FLOOR</h3>
+<ul><li>Library</li></ul>
+</div>
+
+<div class="section">
+<h3>FIRST FLOOR</h3>
+<ul>
+<li>CAD Lab</li>
+<li>Language Lab</li>
+</ul>
+</div>
+
+<div class="section">
+<h3>SECOND FLOOR</h3>
+<ul><li>Software Lab</li></ul>
+</div>
+`,
+
+aud: `
+<div class="section">
+<h3>GROUND FLOOR</h3>
+<ul>
+<li>APJ Hall</li>
+</ul>
+<h3>FIRST FLOOR</h3>
+<ul>
+<li>Drawing hall</li>
+</ul>
+</div>
+`,
+};
+
+// RENDER
+function render(list){
+  let box = document.getElementById("list");
+  box.innerHTML = "";
+
+  list.forEach(item=>{
+    let div = document.createElement("div");
+    div.className = "item";
+    div.innerText = item.name;
+    div.onclick = () => showDetails(item.key, item.name);
+    box.appendChild(div);
+  });
+}
+render(data);
+
+// SHOW DETAILS
+function showDetails(key, title){
+  document.getElementById("title").innerText = title;
+  document.getElementById("details").innerHTML = detailsData[key];
+  go('page3');
+}
+
+// HIGHLIGHT
+function highlightText(text, word){
+  let regex = new RegExp("(" + word + ")", "gi");
+  return text.replace(regex, '<span class="highlight">$1</span>');
+}
+
+// CONTROL SEARCH
+function handleSearch(e){
+  if(e.key === " " || e.key === "Enter"){
+    filter();
+  }
+}
+
+// SEARCH
+function filter(){
+  let val = document.getElementById("search").value.toLowerCase().trim();
+
+  for(let key in detailsData){
+    if(detailsData[key].toLowerCase().includes(val)){
+      let name = data.find(d => d.key === key).name;
+      document.getElementById("title").innerText = name;
+      document.getElementById("details").innerHTML =
+        highlightText(detailsData[key], val);
+      go('page3');
+      return;
+    }
+
+     }
+
+  let filtered = data.filter(d =>
+    d.name.toLowerCase().includes(val)
+  );
+
+  render(filtered);
+}
+// ENTER KEY TO ENTER CAMPUS MAP
+document.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    let page0 = document.getElementById("page0");
+    if(page0.classList.contains("active")){
+      go('page1');
+    }
+  }
+});
+
+// DISABLE SWIPE NAVIGATION
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener("touchstart", e => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+document.addEventListener("touchend", e => {
+  touchEndX = e.changedTouches[0].screenX;
+
+  if(Math.abs(touchEndX - touchStartX) > 50){
+    return;
+  }
+});
+
+</script>
+
+</body>
+</html>
