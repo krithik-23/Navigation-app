@@ -242,7 +242,7 @@ function go(id){
 // MAP
 var map = L.map('map', { crs: L.CRS.Simple, minZoom: -2 });
 var bounds = [[0,0],[1000,2000]];
-L.imageOverlay('/static/map.jpg', bounds).addTo(map);
+L.imageOverlay('/map.jpg', bounds).addTo(map);
 map.fitBounds(bounds);
 
 // DATA
